@@ -1,5 +1,5 @@
 {
-  "name": "@web3-react/injected-connector",
+  "name": "@oasisdex/injected-connector",
   "publishConfig": {
     "access": "public"
   },
