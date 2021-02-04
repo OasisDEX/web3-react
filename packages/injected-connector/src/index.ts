@@ -2,7 +2,7 @@ import { AbstractConnectorArguments, ConnectorUpdate } from '@web3-react/types'
 import { AbstractConnector } from '@web3-react/abstract-connector'
 import warning from 'tiny-warning'
 
-import { SendReturnResult, SendReturn, Send, SendOld } from './types'
+import { SendReturnResult, SendReturn, Request, SendOld } from './types'
 
 function parseSendReturn(sendReturn: SendReturnResult | SendReturn): any {
   return sendReturn.hasOwnProperty('result') ? sendReturn.result : sendReturn
@@ -76,7 +76,7 @@ export class InjectedConnector extends AbstractConnector {
     // try to activate + get account via eth_requestAccounts
     let account
     try {
-      account = await (window.ethereum.sendAsync as Send)('eth_requestAccounts').then(
+      account = await (window.ethereum.request as Request)({ method: 'eth_requestAccounts' }).then(
         sendReturn => parseSendReturn(sendReturn)[0]
       )
     } catch (error) {
@@ -106,14 +106,14 @@ export class InjectedConnector extends AbstractConnector {
 
     let chainId
     try {
-      chainId = await (window.ethereum.sendAsync as Send)('eth_chainId').then(parseSendReturn)
+      chainId = await (window.ethereum.request as Request)({ method: 'eth_chainId' }).then(parseSendReturn)
     } catch {
       warning(false, 'eth_chainId was unsuccessful, falling back to net_version')
     }
 
     if (!chainId) {
       try {
-        chainId = await (window.ethereum.sendAsync as Send)('net_version').then(parseSendReturn)
+        chainId = await (window.ethereum.request as Request)({ method: 'net_version' }).then(parseSendReturn)
       } catch {
         warning(false, 'net_version was unsuccessful, falling back to net version v2')
       }
@@ -121,7 +121,7 @@ export class InjectedConnector extends AbstractConnector {
 
     if (!chainId) {
       try {
-        chainId = parseSendReturn((window.ethereum.sendAsync as SendOld)({ method: 'net_version' }))
+        chainId = parseSendReturn((window.ethereum.request as SendOld)({ method: 'net_version' }))
       } catch {
         warning(false, 'net_version v2 was unsuccessful, falling back to manual matches and static properties')
       }
@@ -149,7 +149,7 @@ export class InjectedConnector extends AbstractConnector {
 
     let account
     try {
-      account = await (window.ethereum.sendAsync as Send)('eth_accounts').then(
+      account = await (window.ethereum.request as Request)({ method: 'eth_accounts' }).then(
         sendReturn => parseSendReturn(sendReturn)[0]
       )
     } catch {
@@ -165,7 +165,7 @@ export class InjectedConnector extends AbstractConnector {
     }
 
     if (!account) {
-      account = parseSendReturn((window.ethereum.sendAsync as SendOld)({ method: 'eth_accounts' }))[0]
+      account = parseSendReturn((window.ethereum.request as SendOld)({ method: 'eth_accounts' }))[0]
     }
 
     return account
@@ -185,7 +185,7 @@ export class InjectedConnector extends AbstractConnector {
     }
 
     try {
-      return await (window.ethereum.sendAsync as Send)('eth_accounts').then(sendReturn => {
+      return await (window.ethereum.request as Request)({ method: 'eth_accounts' }).then(sendReturn => {
         if (parseSendReturn(sendReturn).length > 0) {
           return true
         } else {
